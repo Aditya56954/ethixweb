@@ -13,62 +13,68 @@ A modern, India-focused digital agency website built for clarity, trust, and con
 - Enquiry form with server-side validation, rate limiting, and MongoDB persistence.
 - Session-based admin authentication and protected lead management.
 - Admin dashboard to review enquiries and update their status.
-- SEO metadata and crawler rules.
+
+## Screenshots
+
+### Admin dashboard
+![Ethixweb admin dashboard](docs/screenshots/admin-dashboard.png)
+
+### Work and concept explorations
+![Ethixweb work concepts page](docs/screenshots/work-concepts.png)
+
+### About
+![Ethixweb about page](docs/screenshots/about.png)
+
+### Contact and enquiry form
+![Ethixweb contact page](docs/screenshots/contact.png)
 
 ## Design decisions
 
-- **India-first, not template-first:** straightforward, business-focused messaging for Indian businesses.
-- **Warm cream, charcoal, and red:** a more editorial, approachable identity than the usual dark/purple “AI” aesthetic.
+- **India-first messaging:** clear, business-focused communication for Indian businesses.
+- **Warm cream, charcoal, and red:** an editorial identity that feels approachable and distinctive.
 - **Clear conversion path:** service information, process, and prominent enquiry calls to action.
-- **Motion with restraint:** subtle transitions support the experience without competing with content.
+- **Motion with restraint:** subtle transitions without distracting from content.
 
 ## Tech stack
 
 **Frontend:** React, Vite, Tailwind CSS, React Router, Framer Motion, Lucide  
 **Backend:** Node.js, Express, MongoDB, Mongoose  
 **Security:** Helmet, CORS allowlist, rate limiting, Zod validation, bcrypt password hashing, MongoDB-backed sessions  
-**Deployment:** Vercel (frontend) · Render (API) · MongoDB Atlas (database)
+**Deployment:** Vercel · Render · MongoDB Atlas
 
 ## Architecture
 
 ```text
-Browser
-  └── React + Vite (Vercel)
-        ├── Public pages and enquiry form
-        └── Admin login and dashboard
-                 │ HTTPS / JSON
-                 ▼
-          Express API (Render)
-            ├── /api/enquiries  — validate and save enquiries
-            ├── /api/auth       — login, session, logout
-            └── /api/admin      — protected enquiry listing/status updates
+Browser → React + Vite (Vercel)
+             ├── Public pages and enquiry form
+             └── Admin login and dashboard
+                       │ HTTPS / JSON
+                       ▼
+                 Express API (Render)
+                   ├── /api/enquiries
+                   ├── /api/auth
+                   └── /api/admin
                        │
                        ▼
-                MongoDB Atlas
-            ├── enquiries
-            └── sessions
+                  MongoDB Atlas
+                  ├── enquiries
+                  └── sessions
 ```
 
-The backend is the source of truth for validation, persistence, authentication, and enquiry status. Admin routes require an authenticated session.
+The backend handles validation, persistence, authentication, and enquiry status. Admin routes require an authenticated session.
 
 ## Run locally
 
-### Requirements
+**Requirements:** Node.js 20+, npm, and a MongoDB connection string.
 
-- Node.js 20+
-- npm
-- MongoDB Atlas URI or local MongoDB
-
-### 1. Clone the repository
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/Aditya56954/ethixweb.git
 cd ethixweb
 ```
 
-### 2. Configure the backend
-
-Create `server/.env`:
+2. Create `server/.env`:
 
 ```env
 PORT=5001
@@ -80,9 +86,7 @@ ADMIN_USERNAME=choose_an_admin_username
 ADMIN_PASSWORD_HASH=your_bcrypt_password_hash
 ```
 
-Generate a bcrypt hash for your chosen admin password using the project's installed `bcryptjs` dependency. Never put the plain-text password or real secrets in Git.
-
-Install dependencies and start the API:
+3. Start the backend:
 
 ```bash
 cd server
@@ -90,17 +94,13 @@ npm install
 npm run dev
 ```
 
-If your backend scripts differ, use the scripts defined in `server/package.json`.
-
-### 3. Configure the frontend
-
-Create `client/.env`:
+4. Create `client/.env`:
 
 ```env
 VITE_API_URL=http://localhost:5001/api
 ```
 
-Then start Vite:
+5. Start the frontend in a second terminal:
 
 ```bash
 cd client
@@ -108,47 +108,47 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually http://localhost:5173).
+Use the scripts defined in each `package.json` if they differ. Never commit real secrets or `.env` files.
 
-## Deployment configuration
+## Deployment
 
 **Vercel frontend**
-- Root directory: `client`
-- Build command: `npm run build`
-- Output directory: `dist`
-- Environment variable: `VITE_API_URL=https://ethixweb.onrender.com/api`
+- Root: `client`
+- Build: `npm run build`
+- Output: `dist`
+- `VITE_API_URL=https://ethixweb.onrender.com/api`
 
-**Render backend** — configure these in the service's Environment settings:
+**Render backend environment**
 - `NODE_ENV=production`
 - `CLIENT_URL=https://ethixweb-taupe.vercel.app`
-- `MONGO_URI`
-- `SESSION_SECRET`
-- `ADMIN_USERNAME`
-- `ADMIN_PASSWORD_HASH`
+- `MONGO_URI`, `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`
 
-Keep the CORS origin aligned with the exact deployed frontend origin. Do not commit `.env` files, database credentials, session secrets, or admin passwords.
+Keep the CORS origin aligned with the exact deployed frontend URL.
 
 ## Admin access
 
-Visit **https://ethixweb-taupe.vercel.app/admin** and sign in with the admin username and password configured for the deployed backend. Credentials are intentionally not published in this repository. The dashboard supports viewing enquiries and updating their status.
+Open **https://ethixweb-taupe.vercel.app/admin** and use the credentials configured in Render. Credentials are not published in this repository.
 
-## Performance snapshot
+## PageSpeed snapshot
 
-Google PageSpeed Insights (14 October 2026):
-- **Mobile performance:** 99
-- **Desktop performance:** 99
-- **Accessibility:** 100
-- **Best Practices:** 100
-- **SEO:** 91 (mobile report)
+Google PageSpeed Insights, 14 October 2026:
 
-Scores can vary between runs and devices. Real-user field data may be unavailable for a new site.
+| Metric | Result |
+|---|---:|
+| Mobile performance | **99** |
+| Desktop performance | **99** |
+| Accessibility | **100** |
+| Best Practices | **100** |
+| SEO (mobile) | **91** |
 
-## Security notes
+Scores may vary between runs; real-user field data may not yet be available for a new site.
 
-- Use unique production secrets and a strong admin password.
+## Security
+
+- Use strong, unique production secrets and an admin password.
 - Restrict MongoDB Atlas network access where practical.
-- Keep dependencies updated and verify that secret files are ignored by Git.
-- Never expose the admin password or password hash in frontend code or public documentation.
+- Keep dependencies updated.
+- Never expose passwords, hashes, database credentials, or session secrets in frontend code or public documentation.
 
 ---
 
