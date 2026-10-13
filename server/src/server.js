@@ -18,16 +18,23 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const isProduction = process.env.NODE_ENV === "production";
 
+// Trust Render's HTTPS-terminating proxy in production.
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
+// Required environment variables.
 if (!process.env.SESSION_SECRET) {
-  throw new Error("SESSION_SECRET is missing from server/.env");
+  throw new Error("SESSION_SECRET is missing from environment variables.");
 }
 
 if (!process.env.MONGO_URI) {
-  throw new Error("MONGO_URI is missing from server/.env");
+  throw new Error("MONGO_URI is missing from environment variables.");
 }
 
 app.use(helmet());
 
+// Allow requests from the configured frontend origin.
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -37,7 +44,7 @@ app.use(
 
 app.use(express.json({ limit: "10kb" }));
 
-// General API rate limit
+// General API rate limit.
 app.use(
   "/api",
   rateLimit({
@@ -48,6 +55,7 @@ app.use(
   })
 );
 
+// Basic health endpoints.
 app.get("/", (req, res) => {
   res.status(200).send("Ethixweb API is running!");
 });
@@ -60,6 +68,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Additional protection for administrator login attempts.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
@@ -72,10 +81,14 @@ const loginLimiter = rateLimit({
 });
 
 const startServer = async () => {
+  // Connect to MongoDB before accepting requests.
   await connectDB();
 
+  // Persist sessions in MongoDB.
+  const mongoose = (await import("mongoose")).default;
+
   const sessionStore = MongoStore.create({
-    client: (await import("mongoose")).default.connection.getClient(),
+    client: mongoose.connection.getClient(),
     collectionName: "sessions",
     ttl: 14 * 24 * 60 * 60,
   });
@@ -90,26 +103,33 @@ const startServer = async () => {
       cookie: {
         httpOnly: true,
         secure: isProduction,
-        sameSite: "lax",
+        // Cross-site frontend/backend sessions need None over HTTPS.
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 14 * 24 * 60 * 60 * 1000,
         path: "/",
       },
     })
   );
 
-  app.use("/api/auth", (req, res, next) => {
-    if (req.path === "/login" && req.method === "POST") {
-      return loginLimiter(req, res, next);
-    }
-    next();
-  }, authRoutes);
+  // Apply a stricter rate limit to login requests.
+  app.use(
+    "/api/auth",
+    (req, res, next) => {
+      if (req.path === "/login" && req.method === "POST") {
+        return loginLimiter(req, res, next);
+      }
 
+      next();
+    },
+    authRoutes
+  );
+
+  // Application routes.
   app.use("/api/enquiries", enquiryRoutes);
-
   app.use("/api/admin", adminRoutes);
 
   app.listen(PORT, () => {
-    console.log(`Ethixweb API running on http://localhost:${PORT}`);
+    console.log(`Ethixweb API listening on port ${PORT}`);
     console.log("MongoDB-backed sessions enabled.");
   });
 };
