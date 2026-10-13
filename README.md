@@ -14,20 +14,6 @@ A modern, India-focused digital agency website built for clarity, trust, and con
 - Session-based admin authentication and protected lead management.
 - Admin dashboard to review enquiries and update their status.
 
-## Screenshots
-
-### Admin dashboard
-![Ethixweb admin dashboard](docs/screenshots/admin-dashboard.png)
-
-### Work and concept explorations
-![Ethixweb work concepts page](docs/screenshots/work-concepts.png)
-
-### About
-![Ethixweb about page](docs/screenshots/about.png)
-
-### Contact and enquiry form
-![Ethixweb contact page](docs/screenshots/contact.png)
-
 ## Design decisions
 
 - **India-first messaging:** clear, business-focused communication for Indian businesses.
