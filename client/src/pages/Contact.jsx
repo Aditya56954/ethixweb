@@ -113,7 +113,7 @@ export default function Contact() {
         `${API_URL}/enquiries`,
         payload,
         {
-          timeout: 15000,
+          timeout: 30000,
           headers: { "Content-Type": "application/json" },
         }
       );
@@ -141,7 +141,7 @@ export default function Contact() {
 
       if (error.code === "ECONNABORTED") {
         setSubmitError(
-          "The request timed out. Please check your connection and try again."
+          "The service is waking up. Please wait a moment and try submitting again."
         );
       } else if (!error.response) {
         setSubmitError(
